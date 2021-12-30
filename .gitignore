@@ -1,3 +1,9 @@
+# private
+data/csv/
+data/*.pkl
+data/scenario.csv
+data/syn_pop_data.xlsx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
