@@ -1,8 +1,8 @@
 import subprocess
 
-N_PROC = 6        # 子プロセスの展開数．
-FID = "[1,2]"     # 目的関数のID．"[1]" or "[2]" "[1,2]"
-CITY = "hakodate" # 実行する都市名．"naha" or "hakodate"
+N_PROC = 6    # 子プロセスの展開数．
+FID = "[1]"   # 目的関数のID．"[1]" or "[2]" or "[1,2]"
+CITY = "naha" # 実行する都市名．"naha" or "hakodate"
 
 # コーディングした遺伝子から，設計変数へと変換する
 def gene2pay(gene):
@@ -59,7 +59,7 @@ def evaluation(pop):
         job_list, procs = [], []
         for i in ind_list:
             q = gene2pay(pop[i])
-            cmd = ["python", "eval/syn_pop.py", str(q), "12", FID, CITY, "[123]"]
+            cmd = ["python", "eval/syn_pop.py", str(q), "12", FID, CITY, "[256]"]
             job_list.append(cmd)
         procs = [subprocess.Popen(job, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for job in job_list]
 
@@ -68,10 +68,4 @@ def evaluation(pop):
             f1_list = f1_list + [avg_1]
             f2_list = f2_list + [avg_2]
 
-    for ind, f1, f2 in zip(pop, f1_list, f2_list):
-        if FID == "[1,2]":
-            ind.fitness.values = f1, f2
-        else:
-            ind.fitness.values = f1, 
-
-    return pop
+    return f1_list, f2_list
