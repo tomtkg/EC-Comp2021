@@ -1,3 +1,4 @@
+import math
 import subprocess
 
 N_PROC = 6    # 子プロセスの展開数．
@@ -35,6 +36,15 @@ def gene2pay(gene):
 
     return q
 
+# 子プロセスが完了することを待って，最適な値mを返す
+def get_optm(p):
+    a, _ = p.communicate(timeout=1_000)
+    if CITY == "naha":
+        x = 5613300000 / (5613300000 - min(eval(a)[-1]))
+    else:
+        x = 4752780000 / (4752780000 - min(eval(a)[-1]))
+    return math.floor(x * 100) / 100
+
 # 子プロセスが完了することを待って，適応度を返す
 def ret_fitness(p):
     a, _ = p.communicate(timeout=1_000)
@@ -46,7 +56,7 @@ def ret_fitness(p):
 
 # 個体の評価を行う
 def evaluation(pop):
-    f1_list, f2_list = [], []
+    f1_list, f2_list, m_list = [], [], []
     n_ind = len(pop)
     batch_list, ind_list = [], []
     for i in range(n_ind):
@@ -59,8 +69,14 @@ def evaluation(pop):
         job_list, procs = [], []
         for i in ind_list:
             q = gene2pay(pop[i])
-            cmd = ["python", "eval/syn_pop.py", str(q), "12", FID, CITY, "[256]"]
+            cmd = ["python", "eval/syn_pop.py", str(q), "1", FID, CITY, "[42]"]
             job_list.append(cmd)
+        procs = [subprocess.Popen(job, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for job in job_list]
+
+        for i in range(len(ind_list)):
+            optm = get_optm(procs[i])
+            m_list = m_list + [optm]
+            job_list[i][3] = str(optm)
         procs = [subprocess.Popen(job, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for job in job_list]
 
         for i in range(len(ind_list)):
@@ -68,4 +84,4 @@ def evaluation(pop):
             f1_list = f1_list + [avg_1]
             f2_list = f2_list + [avg_2]
 
-    return f1_list, f2_list
+    return f1_list, f2_list, m_list
