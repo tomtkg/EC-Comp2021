@@ -5,6 +5,13 @@ D = 34        # 支給対象を決める遺伝子長．設計変数の次元数�
 N_PROC = 6    # 子プロセスの展開数．
 FID = "[1]"   # 目的関数のID．"[1]" or "[2]" or "[1,2]"
 CITY = "naha" # 実行する都市名．"naha" or "hakodate"
+SEED = "[42]" # 実行時の乱数シード. "[42]" or "[256]"
+
+def init(city, seed):
+    global CITY
+    CITY = city
+    global SEED
+    SEED = seed
 
 # コーディングした遺伝子から，設計変数へと変換する
 def gene2pay(gene):
@@ -76,7 +83,7 @@ def evaluation(pop):
         job_list = []
 
         for i in ind_list:
-            job_list.append(["python", "eval/syn_pop.py", gene2pay(pop[i]), "1", FID, CITY, "[42]"])
+            job_list.append(["python", "eval/syn_pop.py", gene2pay(pop[i]), "1", FID, CITY, SEED])
         procs = [subprocess.Popen(job, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for job in job_list]
 
         for i in range(len(ind_list)):
